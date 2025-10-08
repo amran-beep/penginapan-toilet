@@ -1,0 +1,2031 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penginapan Asbaja - Sistem Kasir</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.4s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .bounce-in {
+            animation: bounceIn 0.6s ease-out;
+        }
+        
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.3); }
+            50% { opacity: 1; transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .receipt-print {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        .glow-effect {
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .button-3d {
+            transform-style: preserve-3d;
+            transition: all 0.2s ease;
+        }
+        
+        .button-3d:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .button-3d:active {
+            transform: translateY(0px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-full">
+    <div class="container mx-auto p-6 max-w-7xl">
+        <!-- Fixed Logout Button -->
+        <div class="fixed top-4 left-4 z-50">
+            <button onclick="logout()" class="button-3d bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold p-3 rounded-xl transition-all duration-300 shadow-lg glow-effect" title="Logout">
+                🚪
+            </button>
+        </div>
+
+        <!-- Fixed Branding -->
+        <div class="fixed top-4 right-4 z-50">
+            <div class="text-xs text-white font-bold bg-black/20 px-3 py-1 rounded-lg backdrop-blur-sm">Apps by Amran</div>
+        </div>
+
+        <!-- Header -->
+        <div class="glass-effect rounded-2xl shadow-2xl p-8 mb-8 fade-in glow-effect">
+            <div class="flex items-center justify-between">
+                <div class="slide-in">
+                    <h1 class="text-4xl font-bold gradient-text mb-2 floating">🏨 Penginapan Asbaja</h1>
+                    <p class="text-white/80 text-lg font-medium">Sistem Kasir & Manajemen Modern</p>
+                </div>
+                <div class="text-right bounce-in">
+                    <div class="text-sm text-white/70 mb-1">Tanggal & Waktu</div>
+                    <div id="currentDate" class="font-semibold text-white text-lg"></div>
+                    <div id="currentTime" class="text-2xl font-bold text-yellow-300 pulse-animation mb-4"></div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="showReport()" class="button-3d bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg">
+                            📊 Laporan
+                        </button>
+                        <button onclick="showIncomeMenu()" class="button-3d bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg">
+                            💰 Pendapatan
+                        </button>
+                        <button onclick="showExpenseMenu()" class="button-3d bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg">
+                            💸 Biaya
+                        </button>
+                        <button onclick="showProfitLoss()" class="button-3d bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg">
+                            📈 Laba Rugi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Menu Layanan -->
+            <div class="lg:col-span-2">
+                <div class="glass-effect rounded-2xl shadow-2xl p-8 card-hover">
+                    <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+                        <span class="text-3xl mr-3 floating">📋</span>
+                        Menu Layanan Premium
+                    </h2>
+                    
+                    <!-- Penginapan -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-white mb-4 flex items-center slide-in">
+                            <span class="text-2xl mr-2">🛏️</span>
+                            Penginapan Berkualitas
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <button onclick="addItem('Kamar Kipas Single', 25000)" class="button-3d bg-gradient-to-br from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white rounded-xl p-6 text-left transition-all duration-300 shadow-lg">
+                                <div class="text-2xl mb-2">🌀</div>
+                                <div class="font-bold text-lg">Kamar Kipas Single</div>
+                                <div class="text-sm text-blue-100 mb-2">Per malam • Nyaman & Bersih</div>
+                                <div class="text-xl font-bold text-yellow-300">Rp 25.000</div>
+                            </button>
+                            <button onclick="addItem('Kamar Kipas Double', 35000)" class="button-3d bg-gradient-to-br from-purple-400 to-purple-600 hover:from-purple-500 hover:to-purple-700 text-white rounded-xl p-6 text-left transition-all duration-300 shadow-lg">
+                                <div class="text-2xl mb-2">🌀👥</div>
+                                <div class="font-bold text-lg">Kamar Kipas Double</div>
+                                <div class="text-sm text-purple-100 mb-2">Per malam • Untuk 2 Orang</div>
+                                <div class="text-xl font-bold text-yellow-300">Rp 35.000</div>
+                            </button>
+                            <button onclick="addItem('Kamar AC Single', 40000)" class="button-3d bg-gradient-to-br from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white rounded-xl p-6 text-left transition-all duration-300 shadow-lg">
+                                <div class="text-2xl mb-2">❄️</div>
+                                <div class="font-bold text-lg">Kamar AC Single</div>
+                                <div class="text-sm text-yellow-100 mb-2">Per malam • AC Dingin</div>
+                                <div class="text-xl font-bold text-yellow-300">Rp 40.000</div>
+                            </button>
+                            <button onclick="addItem('Kamar AC Double', 50000)" class="button-3d bg-gradient-to-br from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white rounded-xl p-6 text-left transition-all duration-300 shadow-lg">
+                                <div class="text-2xl mb-2">❄️👥</div>
+                                <div class="font-bold text-lg">Kamar AC Double</div>
+                                <div class="text-sm text-green-100 mb-2">Per malam • AC + 2 Orang</div>
+                                <div class="text-xl font-bold text-yellow-300">Rp 50.000</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Toilet Berbayar -->
+                    <div>
+                        <h3 class="text-xl font-semibold text-white mb-4 flex items-center slide-in">
+                            <span class="text-2xl mr-2">🚻</span>
+                            Fasilitas Toilet Bersih
+                        </h3>
+                        <div class="grid grid-cols-1 gap-4">
+                            <button onclick="addItem('Toilet Umum', 2000)" class="button-3d bg-gradient-to-br from-gray-400 to-gray-600 hover:from-gray-500 hover:to-gray-700 text-white rounded-xl p-6 text-center transition-all duration-300 shadow-lg">
+                                <div class="text-4xl mb-3 floating">🚽</div>
+                                <div class="font-bold text-xl mb-2">Toilet Umum</div>
+                                <div class="text-sm text-gray-200 mb-2">Bersih & Wangi</div>
+                                <div class="text-xl font-bold text-yellow-300">Rp 2.000</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Keranjang & Pembayaran -->
+            <div class="space-y-6">
+                <!-- Keranjang -->
+                <div class="glass-effect rounded-2xl shadow-2xl p-6 card-hover">
+                    <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                        <span class="text-2xl mr-2 floating">🛒</span>
+                        Keranjang Belanja
+                    </h2>
+                    <div id="cartItems" class="space-y-3 mb-4 min-h-[200px]">
+                        <div class="text-center text-white/70 py-8">
+                            <div class="text-4xl mb-2">🛍️</div>
+                            <div>Belum ada item dipilih</div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-white/20 pt-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold text-white">Subtotal:</span>
+                            <span id="subtotal" class="font-bold text-lg text-yellow-300">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="font-semibold text-lg text-white">Total:</span>
+                            <span id="total" class="font-bold text-2xl text-yellow-300 pulse-animation">Rp 0</span>
+                        </div>
+                        <button onclick="clearCart()" class="w-full button-3d bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg mb-2">
+                            🗑️ Hapus Semua
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Pembayaran -->
+                <div class="glass-effect rounded-2xl shadow-2xl p-6 card-hover">
+                    <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                        <span class="text-2xl mr-2 floating">💳</span>
+                        Pembayaran
+                    </h2>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-white mb-2">Nama Pelanggan</label>
+                        <input type="text" id="customerName" class="w-full bg-white/20 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all" placeholder="Masukkan nama pelanggan">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-white mb-2">Metode Pembayaran</label>
+                        <select id="paymentMethod" class="w-full bg-white/20 border border-white/30 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all">
+                            <option value="cash" class="text-gray-800">💵 Tunai</option>
+                            <option value="transfer" class="text-gray-800">🏦 Transfer</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-white mb-2">Jumlah Bayar</label>
+                        <input type="number" id="paymentAmount" class="w-full bg-white/20 border border-white/30 rounded-xl px-4 py-3 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all" placeholder="0" oninput="calculateChange()">
+                    </div>
+
+                    <div class="mb-4 p-4 bg-white/10 rounded-xl border border-white/20">
+                        <div class="flex justify-between items-center">
+                            <span class="font-semibold text-white">Kembalian:</span>
+                            <span id="change" class="font-bold text-xl text-green-300">Rp 0</span>
+                        </div>
+                    </div>
+
+                    <button onclick="processPayment()" class="w-full button-3d bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-4 rounded-xl transition-all duration-300 text-lg shadow-lg glow-effect">
+                        ✅ Proses Pembayaran
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Modal -->
+        <div id="reportModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-2xl max-w-6xl w-full mx-4 max-h-[95vh] overflow-hidden">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold">📊 Laporan Transaksi</h3>
+                            <p class="text-blue-100 text-sm">Analisis penjualan dan transaksi harian</p>
+                        </div>
+                        <button onclick="closeReport()" class="text-white hover:text-gray-200 text-3xl font-bold transition-colors">&times;</button>
+                    </div>
+                </div>
+
+                <div class="p-6 overflow-y-auto max-h-[calc(95vh-80px)]">
+                    <!-- Filter Section -->
+                    <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 mb-6 border border-gray-200">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            🔍 Filter Periode
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Dari Tanggal</label>
+                                <input type="date" id="startDate" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Sampai Tanggal</label>
+                                <input type="date" id="endDate" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <button onclick="filterTransactions()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
+                                    🔍 Tampilkan Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-gradient-to-br from-blue-50 to-blue-100 border-l-4 border-blue-500 rounded-lg p-6 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-3xl font-bold text-blue-600" id="totalTransactions">0</div>
+                                    <div class="text-sm font-medium text-blue-800">Total Transaksi</div>
+                                </div>
+                                <div class="text-4xl text-blue-500">📋</div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-50 to-green-100 border-l-4 border-green-500 rounded-lg p-6 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-3xl font-bold text-green-600" id="totalRevenue">Rp 0</div>
+                                    <div class="text-sm font-medium text-green-800">Total Pendapatan</div>
+                                </div>
+                                <div class="text-4xl text-green-500">💰</div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-purple-50 to-purple-100 border-l-4 border-purple-500 rounded-lg p-6 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-3xl font-bold text-purple-600" id="totalRooms">0</div>
+                                    <div class="text-sm font-medium text-purple-800">Kamar Disewa</div>
+                                </div>
+                                <div class="text-4xl text-purple-500">🛏️</div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-orange-50 to-orange-100 border-l-4 border-orange-500 rounded-lg p-6 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-3xl font-bold text-orange-600" id="totalToilets">0</div>
+                                    <div class="text-sm font-medium text-orange-800">Toilet Digunakan</div>
+                                </div>
+                                <div class="text-4xl text-orange-500">🚻</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction Table -->
+                    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                            <h4 class="text-lg font-semibold text-gray-800 flex items-center">
+                                📋 Daftar Transaksi
+                            </h4>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">No. Struk</th>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tanggal</th>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Waktu</th>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Pelanggan</th>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Item</th>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Metode</th>
+                                        <th class="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionTableBody" class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                                            <div class="text-6xl mb-4">📊</div>
+                                            <div class="text-lg font-medium">Belum ada transaksi</div>
+                                            <div class="text-sm">Pilih periode untuk melihat data transaksi</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row justify-end gap-3 mt-8">
+                        <button onclick="exportReport()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center">
+                            📄 Export CSV
+                        </button>
+                        <button onclick="printReport()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center">
+                            🖨️ Cetak Laporan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Income Management Modal -->
+        <div id="incomeModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-2xl max-w-6xl w-full mx-4 max-h-[95vh] overflow-hidden">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold">💰 Menu Pendapatan</h3>
+                            <p class="text-green-100 text-sm">Kelola dan pantau semua sumber pendapatan</p>
+                        </div>
+                        <button onclick="closeIncomeMenu()" class="text-white hover:text-gray-200 text-3xl font-bold transition-colors">&times;</button>
+                    </div>
+                </div>
+
+                <div class="p-6 overflow-y-auto max-h-[calc(95vh-80px)]">
+                    <!-- Filter Section -->
+                    <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 mb-6 border border-gray-200">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            🔍 Filter Periode
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Dari Tanggal</label>
+                                <input type="date" id="incomeStartDate" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Sampai Tanggal</label>
+                                <input type="date" id="incomeEndDate" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <button onclick="filterIncomeData()" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
+                                    🔍 Tampilkan Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Income Form -->
+                    <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-6 mb-8 border border-green-200">
+                        <h4 class="text-lg font-semibold text-green-800 mb-6 flex items-center">
+                            ➕ Tambah Pendapatan Baru
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori Pendapatan</label>
+                                <input type="text" id="incomeCategory" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Contoh: Laundry, Parkir, WiFi">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Deskripsi</label>
+                                <input type="text" id="incomeDescription" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Detail pendapatan">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Jumlah (Rp)</label>
+                                <input type="number" id="incomeAmount" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="0">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal</label>
+                                <input type="date" id="incomeDate" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            </div>
+                            <div class="md:col-span-2">
+                                <button onclick="addIncome()" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
+                                    ➕ Tambah Pendapatan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Income Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-gradient-to-br from-blue-50 to-blue-100 border-l-4 border-blue-500 rounded-lg p-6 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-3xl font-bold text-blue-600" id="totalSalesIncome">Rp 0</div>
+                                    <div class="text-sm font-medium text-blue-800">Penjualan Kamar & Toilet</div>
+                                </div>
+                                <div class="text-4xl text-blue-500">🛏️</div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-50 to-green-100 border-l-4 border-green-500 rounded-lg p-6 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-3xl font-bold text-green-600" id="totalManualIncome">Rp 0</div>
+                                    <div class="text-sm font-medium text-green-800">Pendapatan Lainnya</div>
+                                </div>
+                                <div class="text-4xl text-green-500">💰</div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-purple-50 to-purple-100 border-l-4 border-purple-500 rounded-lg p-6 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-3xl font-bold text-purple-600" id="totalAllIncome">Rp 0</div>
+                                    <div class="text-sm font-medium text-purple-800">Total Pendapatan</div>
+                                </div>
+                                <div class="text-4xl text-purple-500">📊</div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-orange-50 to-orange-100 border-l-4 border-orange-500 rounded-lg p-6 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-3xl font-bold text-orange-600" id="avgDailyIncome">Rp 0</div>
+                                    <div class="text-sm font-medium text-orange-800">Rata-rata Harian</div>
+                                </div>
+                                <div class="text-4xl text-orange-500">📈</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Income Table -->
+                    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                            <h4 class="text-lg font-semibold text-gray-800 flex items-center">
+                                📋 Daftar Pendapatan
+                            </h4>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tanggal</th>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Sumber</th>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Kategori</th>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Deskripsi</th>
+                                        <th class="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Jumlah</th>
+                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="incomeTableBody" class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                                            <div class="text-6xl mb-4">💰</div>
+                                            <div class="text-lg font-medium">Belum ada data pendapatan</div>
+                                            <div class="text-sm">Pilih periode untuk melihat data pendapatan</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row justify-end gap-3 mt-8">
+                        <button onclick="exportIncomeReport()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center">
+                            📄 Export CSV
+                        </button>
+                        <button onclick="printIncomeReport()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center">
+                            🖨️ Cetak Laporan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expense Management Modal -->
+        <div id="expenseModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-2xl max-w-6xl w-full mx-4 max-h-[95vh] overflow-hidden">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold">💸 Menu Biaya</h3>
+                            <p class="text-red-100 text-sm">Kelola dan pantau semua pengeluaran operasional</p>
+                        </div>
+                        <button onclick="closeExpenseMenu()" class="text-white hover:text-gray-200 text-3xl font-bold transition-colors">&times;</button>
+                    </div>
+                </div>
+
+                <div class="p-6 overflow-y-auto max-h-[calc(95vh-80px)]">
+                    <!-- Filter Section -->
+                    <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 mb-6 border border-gray-200">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            🔍 Filter Periode
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Dari Tanggal</label>
+                                <input type="date" id="expenseStartDate" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Sampai Tanggal</label>
+                                <input type="date" id="expenseEndDate" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <button onclick="filterExpenseData()" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
+                                    🔍 Tampilkan Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Expense Form -->
+                    <div class="bg-gradient-to-r from-red-50 to-red-100 rounded-xl p-6 mb-8 border border-red-200">
+                        <h4 class="text-lg font-semibold text-red-800 mb-6 flex items-center">
+                            ➕ Tambah Biaya Baru
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Kategori Biaya</label>
+                                <select id="expenseCategory" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                                    <option value="pdam">💧 PDAM</option>
+                                    <option value="listrik">⚡ Listrik</option>
+                                    <option value="wifi">📶 WiFi</option>
+                                    <option value="insentif">💰 Insentif Karyawan</option>
+                                    <option value="operasional">🏢 Operasional</option>
+                                    <option value="maintenance">🔧 Maintenance</option>
+                                    <option value="gaji">👥 Gaji Karyawan</option>
+                                    <option value="sewa">🏠 Sewa Bangunan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Deskripsi</label>
+                                <input type="text" id="expenseDescription" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" placeholder="Detail pengeluaran">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Jumlah (Rp)</label>
+                                <input type="number" id="expenseAmount" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" placeholder="0">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal</label>
+                                <input type="date" id="expenseDate" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                            </div>
+                            <div class="md:col-span-2">
+                                <button onclick="addExpense()" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
+                                    ➕ Tambah Biaya
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expense Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-gradient-to-br from-red-50 to-red-100 border-l-4 border-red-500 rounded-lg p-6 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-3xl font-bold text-red-600" id="totalExpenses">Rp 0</div>
+                                    <div class="text-sm font-medium text-red-800">Total Biaya</div>
+                                </div>
+                                <div class="text-4xl text-red-500">💸</div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-orange-50 to-orange-100 border-l-4 border-orange-500 rounded-lg p-6 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-3xl font-bold text-orange-600" id="avgDailyExpense">Rp 0</div>
+                                    <div class="text-sm font-medium text-orange-800">Rata-rata Harian</div>
+                                </div>
+                                <div class="text-4xl text-orange-500">📈</div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 border-l-4 border-yellow-500 rounded-lg p-6 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-3xl font-bold text-yellow-600" id="highestExpenseCategory">-</div>
+                                    <div class="text-sm font-medium text-yellow-800">Kategori Tertinggi</div>
+                                </div>
+                                <div class="text-4xl text-yellow-500">🏆</div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-gray-50 to-gray-100 border-l-4 border-gray-500 rounded-lg p-6 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-3xl font-bold text-gray-600" id="totalExpenseItems">0</div>
+                                    <div class="text-sm font-medium text-gray-800">Jumlah Item</div>
+                                </div>
+                                <div class="text-4xl text-gray-500">📋</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expense Table -->
+                    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                        <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                            <h4 class="text-lg font-semibold text-gray-800 flex items-center">
+                                📋 Daftar Biaya
+                            </h4>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tanggal</th>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Kategori</th>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Deskripsi</th>
+                                        <th class="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Jumlah</th>
+                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="expenseTableBody" class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                                            <div class="text-6xl mb-4">💸</div>
+                                            <div class="text-lg font-medium">Belum ada data biaya</div>
+                                            <div class="text-sm">Pilih periode untuk melihat data pengeluaran</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row justify-end gap-3 mt-8">
+                        <button onclick="exportExpenseReport()" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center">
+                            📄 Export CSV
+                        </button>
+                        <button onclick="printExpenseReport()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center">
+                            🖨️ Cetak Laporan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profit Loss Modal -->
+        <div id="profitLossModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-2xl max-w-6xl w-full mx-4 max-h-[95vh] overflow-hidden">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold">📈 Laporan Laba Rugi</h3>
+                            <p class="text-purple-100 text-sm">Analisis kinerja keuangan dan profitabilitas</p>
+                        </div>
+                        <button onclick="closeProfitLoss()" class="text-white hover:text-gray-200 text-3xl font-bold transition-colors">&times;</button>
+                    </div>
+                </div>
+
+                <div class="p-6 overflow-y-auto max-h-[calc(95vh-80px)]">
+                    <!-- Filter Section -->
+                    <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 mb-8 border border-gray-200">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            🔍 Filter Periode
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Dari Tanggal</label>
+                                <input type="date" id="plStartDate" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Sampai Tanggal</label>
+                                <input type="date" id="plEndDate" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <button onclick="generateProfitLoss()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
+                                    📊 Generate Laporan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profit Loss Report -->
+                    <div id="profitLossReport" class="space-y-8">
+                        <!-- Initial State -->
+                        <div class="text-center py-16">
+                            <div class="text-8xl mb-6">📈</div>
+                            <div class="text-2xl font-bold text-gray-800 mb-4">Laporan Laba Rugi</div>
+                            <div class="text-gray-600 mb-8">Pilih periode tanggal dan klik "Generate Laporan" untuk melihat analisis keuangan</div>
+                            <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl p-6 max-w-md mx-auto border border-purple-200">
+                                <div class="text-purple-800 font-semibold mb-2">Fitur Laporan:</div>
+                                <div class="text-sm text-purple-700 space-y-1">
+                                    <div>• Total Pendapatan & Pengeluaran</div>
+                                    <div>• Analisis Laba Bersih</div>
+                                    <div>• Margin Keuntungan</div>
+                                    <div>• Breakdown per Kategori</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end mt-8">
+                        <button onclick="printProfitLoss()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center">
+                            🖨️ Cetak Laporan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Receipt Modal -->
+        <div id="receiptModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+                <div class="text-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">📄 Struk Pembayaran</h3>
+                </div>
+                <div id="receiptContent" class="receipt-print border-2 border-dashed border-gray-300 p-4 mb-4 bg-gray-50">
+                </div>
+                <div class="flex space-x-3">
+                    <button onclick="printReceipt()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
+                        🖨️ Cetak
+                    </button>
+                    <button onclick="closeReceipt()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cart = [];
+        let receiptNumber = 1;
+        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+        let manualTransactions = JSON.parse(localStorage.getItem('manualTransactions')) || [];
+
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('id-ID');
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('id-ID');
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function addItem(name, price) {
+            const existingItem = cart.find(item => item.name === name);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ name, price, quantity: 1 });
+            }
+            updateCart();
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            updateCart();
+        }
+
+        function updateQuantity(index, change) {
+            cart[index].quantity += change;
+            if (cart[index].quantity <= 0) {
+                removeItem(index);
+            } else {
+                updateCart();
+            }
+        }
+
+        function updateCart() {
+            const cartItems = document.getElementById('cartItems');
+            const subtotal = document.getElementById('subtotal');
+            const total = document.getElementById('total');
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<div class="text-center text-gray-500 py-8">Belum ada item dipilih</div>';
+                subtotal.textContent = 'Rp 0';
+                total.textContent = 'Rp 0';
+                return;
+            }
+
+            let totalAmount = 0;
+            cartItems.innerHTML = cart.map((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                totalAmount += itemTotal;
+                return `
+                    <div class="flex items-center justify-between p-4 bg-white/10 rounded-xl border border-white/20 fade-in backdrop-blur-sm">
+                        <div class="flex-1">
+                            <div class="font-semibold text-white text-lg">${item.name}</div>
+                            <div class="text-sm text-white/70">${formatCurrency(item.price)} x ${item.quantity}</div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <button onclick="updateQuantity(${index}, -1)" class="button-3d bg-red-500 hover:bg-red-600 text-white w-8 h-8 rounded-full text-sm font-bold transition-all">-</button>
+                            <span class="font-bold text-white min-w-[24px] text-center text-lg">${item.quantity}</span>
+                            <button onclick="updateQuantity(${index}, 1)" class="button-3d bg-green-500 hover:bg-green-600 text-white w-8 h-8 rounded-full text-sm font-bold transition-all">+</button>
+                        </div>
+                        <div class="ml-4 font-bold text-yellow-300 min-w-[100px] text-right text-lg">${formatCurrency(itemTotal)}</div>
+                    </div>
+                `;
+            }).join('');
+
+            subtotal.textContent = formatCurrency(totalAmount);
+            total.textContent = formatCurrency(totalAmount);
+            calculateChange();
+        }
+
+        function clearCart() {
+            cart = [];
+            updateCart();
+            document.getElementById('paymentAmount').value = '';
+            document.getElementById('customerName').value = '';
+        }
+
+        function calculateChange() {
+            const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const paymentAmount = parseFloat(document.getElementById('paymentAmount').value) || 0;
+            const change = paymentAmount - totalAmount;
+            document.getElementById('change').textContent = formatCurrency(Math.max(0, change));
+        }
+
+        function processPayment() {
+            if (cart.length === 0) {
+                alert('Keranjang masih kosong!');
+                return;
+            }
+
+            const customerName = document.getElementById('customerName').value.trim();
+            if (!customerName) {
+                alert('Mohon masukkan nama pelanggan!');
+                return;
+            }
+
+            const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const paymentAmount = parseFloat(document.getElementById('paymentAmount').value) || 0;
+
+            if (paymentAmount < totalAmount) {
+                alert('Jumlah pembayaran kurang!');
+                return;
+            }
+
+            // Save transaction
+            saveTransaction();
+            
+            generateReceipt();
+            document.getElementById('receiptModal').classList.remove('hidden');
+            document.getElementById('receiptModal').classList.add('flex');
+        }
+
+        function generateReceipt() {
+            const now = new Date();
+            const customerName = document.getElementById('customerName').value;
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const paymentAmount = parseFloat(document.getElementById('paymentAmount').value);
+            const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const change = paymentAmount - totalAmount;
+
+            const paymentMethodText = {
+                'cash': 'Tunai',
+                'transfer': 'Transfer'
+            };
+
+            let receiptHTML = `
+                <div class="text-center mb-4">
+                    <div class="font-bold text-lg">PENGINAPAN ASBAJA</div>
+                    <div class="text-sm">Jl. Contoh No. 123</div>
+                    <div class="text-sm">Telp: (021) 123-4567</div>
+                    <div class="border-b border-dashed border-gray-400 my-2"></div>
+                </div>
+                
+                <div class="mb-3">
+                    <div>No. Struk: #${String(receiptNumber).padStart(4, '0')}</div>
+                    <div>Tanggal: ${now.toLocaleDateString('id-ID')}</div>
+                    <div>Waktu: ${now.toLocaleTimeString('id-ID')}</div>
+                    <div>Kasir: Admin</div>
+                    <div>Pelanggan: ${customerName}</div>
+                </div>
+                
+                <div class="border-b border-dashed border-gray-400 my-2"></div>
+                
+                <div class="mb-3">
+            `;
+
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                receiptHTML += `
+                    <div class="flex justify-between mb-1">
+                        <div>${item.name}</div>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <div class="text-sm">${formatCurrency(item.price)} x ${item.quantity}</div>
+                        <div>${formatCurrency(itemTotal)}</div>
+                    </div>
+                `;
+            });
+
+            receiptHTML += `
+                </div>
+                
+                <div class="border-b border-dashed border-gray-400 my-2"></div>
+                
+                <div class="mb-3">
+                    <div class="flex justify-between font-bold">
+                        <div>TOTAL:</div>
+                        <div>${formatCurrency(totalAmount)}</div>
+                    </div>
+                    <div class="flex justify-between">
+                        <div>Bayar (${paymentMethodText[paymentMethod]}):</div>
+                        <div>${formatCurrency(paymentAmount)}</div>
+                    </div>
+                    <div class="flex justify-between">
+                        <div>Kembalian:</div>
+                        <div>${formatCurrency(change)}</div>
+                    </div>
+                </div>
+                
+                <div class="border-b border-dashed border-gray-400 my-2"></div>
+                
+                <div class="text-center text-sm">
+                    <div>Terima kasih atas kunjungan Anda!</div>
+                    <div>Semoga nyaman dan puas</div>
+                </div>
+            `;
+
+            document.getElementById('receiptContent').innerHTML = receiptHTML;
+            receiptNumber++;
+        }
+
+        function printReceipt() {
+            const receiptContent = document.getElementById('receiptContent').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Struk Pembayaran</title>
+                        <style>
+                            body { font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.4; margin: 20px; }
+                            .receipt-print { max-width: 300px; margin: 0 auto; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="receipt-print">${receiptContent}</div>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function closeReceipt() {
+            document.getElementById('receiptModal').classList.add('hidden');
+            document.getElementById('receiptModal').classList.remove('flex');
+            clearCart();
+        }
+
+        function saveTransaction() {
+            const now = new Date();
+            const customerName = document.getElementById('customerName').value;
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const paymentAmount = parseFloat(document.getElementById('paymentAmount').value);
+            const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            const transaction = {
+                id: receiptNumber,
+                date: now.toISOString().split('T')[0],
+                time: now.toLocaleTimeString('id-ID'),
+                customer: customerName,
+                items: [...cart],
+                paymentMethod: paymentMethod,
+                paymentAmount: paymentAmount,
+                total: totalAmount,
+                timestamp: now.getTime()
+            };
+
+            transactions.push(transaction);
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+        }
+
+        function showReport() {
+            // Set default date range (last 30 days)
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+            
+            document.getElementById('startDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+            
+            filterTransactions();
+            document.getElementById('reportModal').classList.remove('hidden');
+            document.getElementById('reportModal').classList.add('flex');
+        }
+
+        function closeReport() {
+            document.getElementById('reportModal').classList.add('hidden');
+            document.getElementById('reportModal').classList.remove('flex');
+        }
+
+        function filterTransactions() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            let filteredTransactions = transactions;
+            
+            if (startDate && endDate) {
+                filteredTransactions = transactions.filter(transaction => {
+                    return transaction.date >= startDate && transaction.date <= endDate;
+                });
+            }
+            
+            updateReportSummary(filteredTransactions);
+            updateTransactionTable(filteredTransactions);
+        }
+
+        function updateReportSummary(filteredTransactions) {
+            const totalTransactions = filteredTransactions.length;
+            const totalRevenue = filteredTransactions.reduce((sum, transaction) => sum + transaction.total, 0);
+            
+            let totalRooms = 0;
+            let totalToilets = 0;
+            
+            filteredTransactions.forEach(transaction => {
+                transaction.items.forEach(item => {
+                    if (item.name.includes('Kamar')) {
+                        totalRooms += item.quantity;
+                    } else if (item.name.includes('Toilet')) {
+                        totalToilets += item.quantity;
+                    }
+                });
+            });
+            
+            document.getElementById('totalTransactions').textContent = totalTransactions;
+            document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
+            document.getElementById('totalRooms').textContent = totalRooms;
+            document.getElementById('totalToilets').textContent = totalToilets;
+        }
+
+        function updateTransactionTable(filteredTransactions) {
+            const tableBody = document.getElementById('transactionTableBody');
+            
+            if (filteredTransactions.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-500">Tidak ada transaksi dalam periode ini</td></tr>';
+                return;
+            }
+            
+            tableBody.innerHTML = filteredTransactions.map(transaction => {
+                const itemsText = transaction.items.map(item => `${item.name} (${item.quantity})`).join(', ');
+                const paymentMethodText = {
+                    'cash': 'Tunai',
+                    'transfer': 'Transfer'
+                };
+                
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-sm text-gray-900">#${String(transaction.id).padStart(4, '0')}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900">${new Date(transaction.date).toLocaleDateString('id-ID')}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900">${transaction.time}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900">${transaction.customer}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900 max-w-xs truncate" title="${itemsText}">${itemsText}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900">${paymentMethodText[transaction.paymentMethod]}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900 text-right font-semibold">${formatCurrency(transaction.total)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function exportReport() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            let filteredTransactions = transactions;
+            if (startDate && endDate) {
+                filteredTransactions = transactions.filter(transaction => {
+                    return transaction.date >= startDate && transaction.date <= endDate;
+                });
+            }
+            
+            // Create CSV content
+            let csvContent = "No. Struk,Tanggal,Waktu,Pelanggan,Item,Metode Pembayaran,Total\n";
+            
+            filteredTransactions.forEach(transaction => {
+                const itemsText = transaction.items.map(item => `${item.name} (${item.quantity})`).join('; ');
+                const paymentMethodText = {
+                    'cash': 'Tunai',
+                    'transfer': 'Transfer'
+                };
+                
+                csvContent += `#${String(transaction.id).padStart(4, '0')},${transaction.date},${transaction.time},"${transaction.customer}","${itemsText}",${paymentMethodText[transaction.paymentMethod]},${transaction.total}\n`;
+            });
+            
+            // Download CSV
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `laporan-transaksi-${startDate}-${endDate}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function printReport() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            let filteredTransactions = transactions;
+            if (startDate && endDate) {
+                filteredTransactions = transactions.filter(transaction => {
+                    return transaction.date >= startDate && transaction.date <= endDate;
+                });
+            }
+            
+            const totalRevenue = filteredTransactions.reduce((sum, transaction) => sum + transaction.total, 0);
+            let totalRooms = 0;
+            let totalToilets = 0;
+            
+            filteredTransactions.forEach(transaction => {
+                transaction.items.forEach(item => {
+                    if (item.name.includes('Kamar')) {
+                        totalRooms += item.quantity;
+                    } else if (item.name.includes('Toilet')) {
+                        totalToilets += item.quantity;
+                    }
+                });
+            });
+            
+            let reportHTML = `
+                <html>
+                    <head>
+                        <title>Laporan Transaksi</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            .header { text-align: center; margin-bottom: 30px; }
+                            .summary { display: flex; justify-content: space-around; margin-bottom: 30px; }
+                            .summary-item { text-align: center; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                            th { background-color: #f2f2f2; }
+                            .text-right { text-align: right; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h1>LAPORAN TRANSAKSI</h1>
+                            <h2>PENGINAPAN ASBAJA</h2>
+                            <p>Periode: ${new Date(startDate).toLocaleDateString('id-ID')} - ${new Date(endDate).toLocaleDateString('id-ID')}</p>
+                        </div>
+                        
+                        <div class="summary">
+                            <div class="summary-item">
+                                <h3>${filteredTransactions.length}</h3>
+                                <p>Total Transaksi</p>
+                            </div>
+                            <div class="summary-item">
+                                <h3>${formatCurrency(totalRevenue)}</h3>
+                                <p>Total Pendapatan</p>
+                            </div>
+                            <div class="summary-item">
+                                <h3>${totalRooms}</h3>
+                                <p>Kamar Disewa</p>
+                            </div>
+                            <div class="summary-item">
+                                <h3>${totalToilets}</h3>
+                                <p>Toilet Digunakan</p>
+                            </div>
+                        </div>
+                        
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>No. Struk</th>
+                                    <th>Tanggal</th>
+                                    <th>Waktu</th>
+                                    <th>Pelanggan</th>
+                                    <th>Item</th>
+                                    <th>Metode</th>
+                                    <th class="text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            filteredTransactions.forEach(transaction => {
+                const itemsText = transaction.items.map(item => `${item.name} (${item.quantity})`).join(', ');
+                const paymentMethodText = {
+                    'cash': 'Tunai',
+                    'transfer': 'Transfer'
+                };
+                
+                reportHTML += `
+                    <tr>
+                        <td>#${String(transaction.id).padStart(4, '0')}</td>
+                        <td>${new Date(transaction.date).toLocaleDateString('id-ID')}</td>
+                        <td>${transaction.time}</td>
+                        <td>${transaction.customer}</td>
+                        <td>${itemsText}</td>
+                        <td>${paymentMethodText[transaction.paymentMethod]}</td>
+                        <td class="text-right">${formatCurrency(transaction.total)}</td>
+                    </tr>
+                `;
+            });
+            
+            reportHTML += `
+                            </tbody>
+                        </table>
+                    </body>
+                </html>
+            `;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(reportHTML);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // Income Management Functions
+        function showIncomeMenu() {
+            // Set default date range (current month)
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            
+            document.getElementById('incomeStartDate').value = firstDay.toISOString().split('T')[0];
+            document.getElementById('incomeEndDate').value = today.toISOString().split('T')[0];
+            document.getElementById('incomeDate').value = today.toISOString().split('T')[0];
+            
+            filterIncomeData();
+            document.getElementById('incomeModal').classList.remove('hidden');
+            document.getElementById('incomeModal').classList.add('flex');
+        }
+
+        function closeIncomeMenu() {
+            document.getElementById('incomeModal').classList.add('hidden');
+            document.getElementById('incomeModal').classList.remove('flex');
+        }
+
+        function addIncome() {
+            const category = document.getElementById('incomeCategory').value;
+            const description = document.getElementById('incomeDescription').value.trim();
+            const amount = parseFloat(document.getElementById('incomeAmount').value);
+            const date = document.getElementById('incomeDate').value;
+
+            if (!description || !amount || amount <= 0 || !date) {
+                alert('Mohon lengkapi semua field dengan benar!');
+                return;
+            }
+
+            const income = {
+                id: Date.now(),
+                type: 'income',
+                category: category,
+                description: description,
+                amount: amount,
+                date: date,
+                timestamp: new Date().getTime()
+            };
+
+            manualTransactions.push(income);
+            localStorage.setItem('manualTransactions', JSON.stringify(manualTransactions));
+
+            // Clear form
+            document.getElementById('incomeDescription').value = '';
+            document.getElementById('incomeAmount').value = '';
+            
+            filterIncomeData();
+            alert('Pendapatan berhasil ditambahkan!');
+        }
+
+        function filterIncomeData() {
+            const startDate = document.getElementById('incomeStartDate').value;
+            const endDate = document.getElementById('incomeEndDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('Mohon pilih periode tanggal!');
+                return;
+            }
+
+            updateIncomeTable(startDate, endDate);
+            updateIncomeSummary(startDate, endDate);
+        }
+
+        function updateIncomeTable(startDate, endDate) {
+            const tableBody = document.getElementById('incomeTableBody');
+            
+            // Get sales income from transactions
+            const salesIncome = transactions
+                .filter(t => t.date >= startDate && t.date <= endDate)
+                .map(t => ({
+                    date: t.date,
+                    source: 'Penjualan',
+                    category: 'Kamar & Toilet',
+                    description: t.items.map(item => `${item.name} (${item.quantity})`).join(', '),
+                    amount: t.total,
+                    canDelete: false
+                }));
+
+            // Get manual income
+            const manualIncome = manualTransactions
+                .filter(t => t.type === 'income' && t.date >= startDate && t.date <= endDate)
+                .map(t => ({
+                    id: t.id,
+                    date: t.date,
+                    source: 'Manual',
+                    category: getCategoryLabel(t.category),
+                    description: t.description,
+                    amount: t.amount,
+                    canDelete: true
+                }));
+
+            const allIncome = [...salesIncome, ...manualIncome]
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (allIncome.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Tidak ada data pendapatan dalam periode ini</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = allIncome.map(income => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-sm text-gray-900">${new Date(income.date).toLocaleDateString('id-ID')}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">${income.source}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">${income.category}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">${income.description}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900 text-right font-semibold text-green-600">${formatCurrency(income.amount)}</td>
+                    <td class="px-4 py-3 text-center">
+                        ${income.canDelete ? 
+                            `<button onclick="deleteIncome(${income.id})" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs">🗑️ Hapus</button>` :
+                            '<span class="text-gray-400 text-xs">Auto</span>'
+                        }
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateIncomeSummary(startDate, endDate) {
+            // Calculate sales income
+            const salesIncome = transactions
+                .filter(t => t.date >= startDate && t.date <= endDate)
+                .reduce((sum, t) => sum + t.total, 0);
+
+            // Calculate manual income
+            const manualIncome = manualTransactions
+                .filter(t => t.type === 'income' && t.date >= startDate && t.date <= endDate)
+                .reduce((sum, t) => sum + t.amount, 0);
+
+            const totalIncome = salesIncome + manualIncome;
+            
+            // Calculate days in period
+            const days = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1;
+            const avgDaily = totalIncome / days;
+
+            document.getElementById('totalSalesIncome').textContent = formatCurrency(salesIncome);
+            document.getElementById('totalManualIncome').textContent = formatCurrency(manualIncome);
+            document.getElementById('totalAllIncome').textContent = formatCurrency(totalIncome);
+            document.getElementById('avgDailyIncome').textContent = formatCurrency(avgDaily);
+        }
+
+        function deleteIncome(id) {
+            if (confirm('Yakin ingin menghapus pendapatan ini?')) {
+                manualTransactions = manualTransactions.filter(t => t.id !== id);
+                localStorage.setItem('manualTransactions', JSON.stringify(manualTransactions));
+                filterIncomeData();
+            }
+        }
+
+        // Expense Management Functions
+        function showExpenseMenu() {
+            // Set default date range (current month)
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            
+            document.getElementById('expenseStartDate').value = firstDay.toISOString().split('T')[0];
+            document.getElementById('expenseEndDate').value = today.toISOString().split('T')[0];
+            document.getElementById('expenseDate').value = today.toISOString().split('T')[0];
+            
+            filterExpenseData();
+            document.getElementById('expenseModal').classList.remove('hidden');
+            document.getElementById('expenseModal').classList.add('flex');
+        }
+
+        function closeExpenseMenu() {
+            document.getElementById('expenseModal').classList.add('hidden');
+            document.getElementById('expenseModal').classList.remove('flex');
+        }
+
+        function addExpense() {
+            const category = document.getElementById('expenseCategory').value;
+            const description = document.getElementById('expenseDescription').value.trim();
+            const amount = parseFloat(document.getElementById('expenseAmount').value);
+            const date = document.getElementById('expenseDate').value;
+
+            if (!description || !amount || amount <= 0 || !date) {
+                alert('Mohon lengkapi semua field dengan benar!');
+                return;
+            }
+
+            const expense = {
+                id: Date.now(),
+                type: 'expense',
+                category: category,
+                description: description,
+                amount: amount,
+                date: date,
+                timestamp: new Date().getTime()
+            };
+
+            manualTransactions.push(expense);
+            localStorage.setItem('manualTransactions', JSON.stringify(manualTransactions));
+
+            // Clear form
+            document.getElementById('expenseDescription').value = '';
+            document.getElementById('expenseAmount').value = '';
+            
+            filterExpenseData();
+            alert('Biaya berhasil ditambahkan!');
+        }
+
+        function filterExpenseData() {
+            const startDate = document.getElementById('expenseStartDate').value;
+            const endDate = document.getElementById('expenseEndDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('Mohon pilih periode tanggal!');
+                return;
+            }
+
+            updateExpenseTable(startDate, endDate);
+            updateExpenseSummary(startDate, endDate);
+        }
+
+        function updateExpenseTable(startDate, endDate) {
+            const tableBody = document.getElementById('expenseTableBody');
+            
+            const expenses = manualTransactions
+                .filter(t => t.type === 'expense' && t.date >= startDate && t.date <= endDate)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (expenses.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">Tidak ada data biaya dalam periode ini</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = expenses.map(expense => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-sm text-gray-900">${new Date(expense.date).toLocaleDateString('id-ID')}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">${getCategoryLabel(expense.category)}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">${expense.description}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900 text-right font-semibold text-red-600">${formatCurrency(expense.amount)}</td>
+                    <td class="px-4 py-3 text-center">
+                        <button onclick="deleteExpense(${expense.id})" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs">
+                            🗑️ Hapus
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateExpenseSummary(startDate, endDate) {
+            const expenses = manualTransactions
+                .filter(t => t.type === 'expense' && t.date >= startDate && t.date <= endDate);
+
+            const totalExpenses = expenses.reduce((sum, t) => sum + t.amount, 0);
+            
+            // Calculate days in period
+            const days = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1;
+            const avgDaily = totalExpenses / days;
+
+            // Find highest expense category
+            const categoryTotals = {};
+            expenses.forEach(expense => {
+                if (!categoryTotals[expense.category]) {
+                    categoryTotals[expense.category] = 0;
+                }
+                categoryTotals[expense.category] += expense.amount;
+            });
+
+            let highestCategory = '-';
+            let highestAmount = 0;
+            Object.entries(categoryTotals).forEach(([category, amount]) => {
+                if (amount > highestAmount) {
+                    highestAmount = amount;
+                    highestCategory = getCategoryLabel(category);
+                }
+            });
+
+            document.getElementById('totalExpenses').textContent = formatCurrency(totalExpenses);
+            document.getElementById('avgDailyExpense').textContent = formatCurrency(avgDaily);
+            document.getElementById('highestExpenseCategory').textContent = highestCategory;
+            document.getElementById('totalExpenseItems').textContent = expenses.length;
+        }
+
+        function deleteExpense(id) {
+            if (confirm('Yakin ingin menghapus biaya ini?')) {
+                manualTransactions = manualTransactions.filter(t => t.id !== id);
+                localStorage.setItem('manualTransactions', JSON.stringify(manualTransactions));
+                filterExpenseData();
+            }
+        }
+
+        function getCategoryLabel(category) {
+            const categoryLabels = {
+                'kamar': '🛏️ Kamar',
+                'toilet': '🚻 Toilet',
+                'laundry': '👕 Laundry',
+                'parkir': '🚗 Parkir',
+                'wifi': '📶 WiFi',
+                'pdam': '💧 PDAM',
+                'listrik': '⚡ Listrik',
+                'insentif': '💰 Insentif Karyawan',
+                'operasional': '🏢 Operasional',
+                'maintenance': '🔧 Maintenance',
+                'gaji': '👥 Gaji Karyawan',
+                'sewa': '🏠 Sewa Bangunan'
+            };
+            return categoryLabels[category] || category;
+        }
+
+        // Export Functions
+        function exportIncomeReport() {
+            const startDate = document.getElementById('incomeStartDate').value;
+            const endDate = document.getElementById('incomeEndDate').value;
+            
+            // Create CSV content
+            let csvContent = "Tanggal,Sumber,Kategori,Deskripsi,Jumlah\n";
+            
+            // Add sales income
+            const salesIncome = transactions
+                .filter(t => t.date >= startDate && t.date <= endDate);
+            
+            salesIncome.forEach(t => {
+                const itemsText = t.items.map(item => `${item.name} (${item.quantity})`).join('; ');
+                csvContent += `${t.date},Penjualan,"Kamar & Toilet","${itemsText}",${t.total}\n`;
+            });
+
+            // Add manual income
+            const manualIncome = manualTransactions
+                .filter(t => t.type === 'income' && t.date >= startDate && t.date <= endDate);
+            
+            manualIncome.forEach(t => {
+                csvContent += `${t.date},Manual,"${getCategoryLabel(t.category)}","${t.description}",${t.amount}\n`;
+            });
+            
+            // Download CSV
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `laporan-pendapatan-${startDate}-${endDate}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportExpenseReport() {
+            const startDate = document.getElementById('expenseStartDate').value;
+            const endDate = document.getElementById('expenseEndDate').value;
+            
+            const expenses = manualTransactions
+                .filter(t => t.type === 'expense' && t.date >= startDate && t.date <= endDate);
+            
+            // Create CSV content
+            let csvContent = "Tanggal,Kategori,Deskripsi,Jumlah\n";
+            
+            expenses.forEach(expense => {
+                csvContent += `${expense.date},"${getCategoryLabel(expense.category)}","${expense.description}",${expense.amount}\n`;
+            });
+            
+            // Download CSV
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `laporan-biaya-${startDate}-${endDate}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function printIncomeReport() {
+            const startDate = document.getElementById('incomeStartDate').value;
+            const endDate = document.getElementById('incomeEndDate').value;
+            
+            const salesIncome = transactions
+                .filter(t => t.date >= startDate && t.date <= endDate)
+                .reduce((sum, t) => sum + t.total, 0);
+
+            const manualIncome = manualTransactions
+                .filter(t => t.type === 'income' && t.date >= startDate && t.date <= endDate)
+                .reduce((sum, t) => sum + t.amount, 0);
+
+            const totalIncome = salesIncome + manualIncome;
+            
+            let reportHTML = `
+                <html>
+                    <head>
+                        <title>Laporan Pendapatan</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            .header { text-align: center; margin-bottom: 30px; }
+                            .summary { display: flex; justify-content: space-around; margin-bottom: 30px; }
+                            .summary-item { text-align: center; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                            th { background-color: #f2f2f2; }
+                            .text-right { text-align: right; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h1>LAPORAN PENDAPATAN</h1>
+                            <h2>PENGINAPAN ASBAJA</h2>
+                            <p>Periode: ${new Date(startDate).toLocaleDateString('id-ID')} - ${new Date(endDate).toLocaleDateString('id-ID')}</p>
+                        </div>
+                        
+                        <div class="summary">
+                            <div class="summary-item">
+                                <h3>${formatCurrency(salesIncome)}</h3>
+                                <p>Penjualan</p>
+                            </div>
+                            <div class="summary-item">
+                                <h3>${formatCurrency(manualIncome)}</h3>
+                                <p>Pendapatan Lainnya</p>
+                            </div>
+                            <div class="summary-item">
+                                <h3>${formatCurrency(totalIncome)}</h3>
+                                <p>Total Pendapatan</p>
+                            </div>
+                        </div>
+                    </body>
+                </html>
+            `;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(reportHTML);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function printExpenseReport() {
+            const startDate = document.getElementById('expenseStartDate').value;
+            const endDate = document.getElementById('expenseEndDate').value;
+            
+            const expenses = manualTransactions
+                .filter(t => t.type === 'expense' && t.date >= startDate && t.date <= endDate);
+
+            const totalExpenses = expenses.reduce((sum, t) => sum + t.amount, 0);
+            
+            let reportHTML = `
+                <html>
+                    <head>
+                        <title>Laporan Biaya</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            .header { text-align: center; margin-bottom: 30px; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                            th { background-color: #f2f2f2; }
+                            .text-right { text-align: right; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h1>LAPORAN BIAYA</h1>
+                            <h2>PENGINAPAN ASBAJA</h2>
+                            <p>Periode: ${new Date(startDate).toLocaleDateString('id-ID')} - ${new Date(endDate).toLocaleDateString('id-ID')}</p>
+                            <h3>Total Biaya: ${formatCurrency(totalExpenses)}</h3>
+                        </div>
+                        
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Kategori</th>
+                                    <th>Deskripsi</th>
+                                    <th class="text-right">Jumlah</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            expenses.forEach(expense => {
+                reportHTML += `
+                    <tr>
+                        <td>${new Date(expense.date).toLocaleDateString('id-ID')}</td>
+                        <td>${getCategoryLabel(expense.category)}</td>
+                        <td>${expense.description}</td>
+                        <td class="text-right">${formatCurrency(expense.amount)}</td>
+                    </tr>
+                `;
+            });
+            
+            reportHTML += `
+                            </tbody>
+                        </table>
+                    </body>
+                </html>
+            `;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(reportHTML);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // Profit Loss Functions
+        function showProfitLoss() {
+            // Set default date range (current month)
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            
+            document.getElementById('plStartDate').value = firstDay.toISOString().split('T')[0];
+            document.getElementById('plEndDate').value = today.toISOString().split('T')[0];
+            
+            generateProfitLoss();
+            document.getElementById('profitLossModal').classList.remove('hidden');
+            document.getElementById('profitLossModal').classList.add('flex');
+        }
+
+        function closeProfitLoss() {
+            document.getElementById('profitLossModal').classList.add('hidden');
+            document.getElementById('profitLossModal').classList.remove('flex');
+        }
+
+        function generateProfitLoss() {
+            const startDate = document.getElementById('plStartDate').value;
+            const endDate = document.getElementById('plEndDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('Mohon pilih periode tanggal!');
+                return;
+            }
+
+            // Filter sales transactions
+            const filteredSales = transactions.filter(transaction => {
+                return transaction.date >= startDate && transaction.date <= endDate;
+            });
+
+            // Filter manual transactions
+            const filteredManual = manualTransactions.filter(transaction => {
+                return transaction.date >= startDate && transaction.date <= endDate;
+            });
+
+            // Calculate income from sales
+            const salesIncome = filteredSales.reduce((sum, transaction) => sum + transaction.total, 0);
+
+            // Calculate income and expenses from manual transactions
+            const manualIncome = filteredManual
+                .filter(t => t.type === 'income')
+                .reduce((sum, transaction) => sum + transaction.amount, 0);
+
+            const manualExpenses = filteredManual
+                .filter(t => t.type === 'expense')
+                .reduce((sum, transaction) => sum + transaction.amount, 0);
+
+            // Group expenses by category
+            const expensesByCategory = {};
+            filteredManual
+                .filter(t => t.type === 'expense')
+                .forEach(transaction => {
+                    if (!expensesByCategory[transaction.category]) {
+                        expensesByCategory[transaction.category] = 0;
+                    }
+                    expensesByCategory[transaction.category] += transaction.amount;
+                });
+
+            const totalIncome = salesIncome + manualIncome;
+            const totalExpenses = manualExpenses;
+            const netProfit = totalIncome - totalExpenses;
+
+            const categoryLabels = {
+                'kamar': '🛏️ Kamar',
+                'toilet': '🚻 Toilet',
+                'pdam': '💧 PDAM',
+                'listrik': '⚡ Listrik',
+                'wifi': '📶 WiFi',
+                'insentif': '💰 Insentif Karyawan',
+                'operasional': '🏢 Operasional',
+                'maintenance': '🔧 Maintenance',
+                'gaji': '👥 Gaji Karyawan',
+                'sewa': '🏠 Sewa Bangunan'
+            };
+
+            let reportHTML = `
+                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                    <div class="text-center mb-6">
+                        <h4 class="text-xl font-bold text-gray-800">LAPORAN LABA RUGI</h4>
+                        <p class="text-gray-600">Periode: ${new Date(startDate).toLocaleDateString('id-ID')} - ${new Date(endDate).toLocaleDateString('id-ID')}</p>
+                    </div>
+
+                    <!-- Income Section -->
+                    <div class="mb-6">
+                        <h5 class="text-lg font-semibold text-green-700 mb-3 border-b border-gray-200 pb-2">💰 PENDAPATAN</h5>
+                        <div class="space-y-2 ml-4">
+                            <div class="flex justify-between">
+                                <span>Penjualan Kamar & Toilet</span>
+                                <span class="font-semibold">${formatCurrency(salesIncome)}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Pendapatan Lainnya</span>
+                                <span class="font-semibold">${formatCurrency(manualIncome)}</span>
+                            </div>
+                            <div class="flex justify-between font-bold text-lg border-t border-gray-200 pt-2">
+                                <span>Total Pendapatan</span>
+                                <span class="text-green-600">${formatCurrency(totalIncome)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expenses Section -->
+                    <div class="mb-6">
+                        <h5 class="text-lg font-semibold text-red-700 mb-3 border-b border-gray-200 pb-2">💸 PENGELUARAN</h5>
+                        <div class="space-y-2 ml-4">
+            `;
+
+            Object.entries(expensesByCategory).forEach(([category, amount]) => {
+                reportHTML += `
+                    <div class="flex justify-between">
+                        <span>${categoryLabels[category] || category}</span>
+                        <span class="font-semibold">${formatCurrency(amount)}</span>
+                    </div>
+                `;
+            });
+
+            reportHTML += `
+                            <div class="flex justify-between font-bold text-lg border-t border-gray-200 pt-2">
+                                <span>Total Pengeluaran</span>
+                                <span class="text-red-600">${formatCurrency(totalExpenses)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Net Profit Section -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xl font-bold">LABA BERSIH</span>
+                            <span class="text-2xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}">
+                                ${formatCurrency(netProfit)}
+                            </span>
+                        </div>
+                        <div class="text-sm text-gray-600 mt-2">
+                            Margin: ${totalIncome > 0 ? ((netProfit / totalIncome) * 100).toFixed(1) : 0}%
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('profitLossReport').innerHTML = reportHTML;
+        }
+
+        function printProfitLoss() {
+            const reportContent = document.getElementById('profitLossReport').innerHTML;
+            const startDate = document.getElementById('plStartDate').value;
+            const endDate = document.getElementById('plEndDate').value;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Laporan Laba Rugi</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            .text-green-600 { color: #059669; }
+                            .text-red-600 { color: #dc2626; }
+                            .font-bold { font-weight: bold; }
+                            .text-lg { font-size: 1.125rem; }
+                            .text-xl { font-size: 1.25rem; }
+                            .text-2xl { font-size: 1.5rem; }
+                            .mb-3 { margin-bottom: 0.75rem; }
+                            .mb-6 { margin-bottom: 1.5rem; }
+                            .ml-4 { margin-left: 1rem; }
+                            .p-4 { padding: 1rem; }
+                            .p-6 { padding: 1.5rem; }
+                            .pt-2 { padding-top: 0.5rem; }
+                            .pb-2 { padding-bottom: 0.5rem; }
+                            .border-t { border-top: 1px solid #e5e7eb; }
+                            .border-b { border-bottom: 1px solid #e5e7eb; }
+                            .border-gray-200 { border-color: #e5e7eb; }
+                            .bg-gray-50 { background-color: #f9fafb; }
+                            .rounded-lg { border-radius: 0.5rem; }
+                            .space-y-2 > * + * { margin-top: 0.5rem; }
+                            .flex { display: flex; }
+                            .justify-between { justify-content: space-between; }
+                            .items-center { align-items: center; }
+                            .text-center { text-align: center; }
+                        </style>
+                    </head>
+                    <body>
+                        ${reportContent}
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function logout() {
+            // Save all transaction data before logout
+            const allData = {
+                transactions: transactions,
+                manualTransactions: manualTransactions,
+                receiptNumber: receiptNumber,
+                exportDate: new Date().toISOString()
+            };
+            
+            // Create and download backup file
+            const dataStr = JSON.stringify(allData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `backup-penginapan-asbaja-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            // Show saving message
+            alert('Data transaksi telah disimpan dan diunduh. Sistem akan ditutup. Terima kasih!');
+            
+            // Clear all data from localStorage
+            localStorage.clear();
+            
+            // Reset variables
+            cart = [];
+            receiptNumber = 1;
+            transactions = [];
+            manualTransactions = [];
+            
+            // Clear forms and displays
+            clearCart();
+            
+            // Close the application by redirecting to a blank page
+            setTimeout(() => {
+                window.location.href = 'about:blank';
+                window.close();
+            }, 1000);
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98b26a9c91f49c99',t:'MTc1OTg5MjcyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
